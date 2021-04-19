@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             }
             .addOnCompleteListener {
                 Common.currentShipperUser = userModel
-                Common.updateToken(this, it.result!!.token)
+                Common.updateToken(this, it.result!!.token,false,true)
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()
             }

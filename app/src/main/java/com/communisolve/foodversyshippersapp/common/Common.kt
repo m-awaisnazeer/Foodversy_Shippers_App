@@ -44,17 +44,31 @@ object Common {
         return java.lang.StringBuilder("/topics/new_order").toString()
     }
 
-    val SHIPPINGORDER_REF: String="ShippingOrder"
-    val NOTI_CONTENT: String?="content"
-    val NOTI_TITLE: String?="title"
-    val TOKEN_REF: String="Tokens"
-    fun updateToken(context: Context, token: String) {
-        if (currentShipperUser!=null)
+    val SHIPPINGORDER_REF: String = "ShippingOrder"
+    val NOTI_CONTENT: String? = "content"
+    val NOTI_TITLE: String? = "title"
+    val TOKEN_REF: String = "Tokens"
+    fun updateToken(
+        context: Context,
+        token: String,
+        isServerToken: Boolean,
+        isShipperToken: Boolean
+    ) {
+        if (currentShipperUser != null)
             FirebaseDatabase.getInstance().getReference(Common.TOKEN_REF)
                 .child(Common.currentShipperUser!!.uid)
-                .setValue(TokenModel(currentShipperUser!!.uid,token))
-                .addOnFailureListener { Toast.makeText(context, "$token", Toast.LENGTH_SHORT).show() }
-                .addOnSuccessListener {  }
+                .setValue(
+                    TokenModel(
+                        currentShipperUser!!.uid,
+                        token,
+                        isServerToken,
+                        isShipperToken
+                    )
+                )
+                .addOnFailureListener {
+                    Toast.makeText(context, "$token", Toast.LENGTH_SHORT).show()
+                }
+                .addOnSuccessListener { }
 
     }
 
@@ -63,34 +77,44 @@ object Common {
         intent: Intent?
     ) {
         var pendingInent: PendingIntent? = null
-        if (intent !=null)
-            pendingInent = PendingIntent.getActivity(context,id,intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val NOTIFICATION_CHANNEL_ID = "com.communisolve.foodversyserverapp"
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (intent != null)
+            pendingInent =
+                PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val NOTIFICATION_CHANNEL_ID = "com.communisolve.foodversyshippersapp"
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val notificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID,"Foodversy_Server",
-                NotificationManager.IMPORTANCE_DEFAULT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID, "Foodversy_Shipper",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
 
-            notificationChannel.description = "Foodversy_Server_App"
+            notificationChannel.description = "Foodversy_Shipper_App"
             notificationChannel.enableLights(true)
             notificationChannel.enableVibration(true)
             notificationChannel.lightColor = Color.RED
-            notificationChannel.vibrationPattern = longArrayOf(0,1000,500,1000)
+            notificationChannel.vibrationPattern = longArrayOf(0, 1000, 500, 1000)
 
             notificationManager.createNotificationChannel(notificationChannel)
         }
-        val builder  = NotificationCompat.Builder(context,NOTIFICATION_CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
 
         builder.setContentTitle(title).setContentText(content).setAutoCancel(true)
             .setSmallIcon(R.mipmap.ic_launcher_round)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.ic_baseline_restaurant_menu_24))
+            .setLargeIcon(
+                BitmapFactory.decodeResource(
+                    context.resources,
+                    R.drawable.ic_baseline_restaurant_menu_24
+                )
+            )
         if (pendingInent != null)
             builder.setContentIntent(pendingInent)
 
         val notification = builder.build()
-        notificationManager.notify(id,notification)
+        notificationManager.notify(id, notification)
     }
+
     fun convertStatustoString(orderStatus: Int): String? =
         when (orderStatus) {
             0 -> "Placed"
@@ -99,7 +123,8 @@ object Common {
             -1 -> "Cancelled"
             else -> "Error"
         }
-    val ORDER_REF: String="Orders"
+
+    val ORDER_REF: String = "Orders"
 
     val CATEGORY_REF: String = "Category"
     val SHIPPERS_REF = "Shippers"
