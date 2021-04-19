@@ -1,6 +1,7 @@
 package com.communisolve.foodversyshippersapp.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,9 @@ import com.communisolve.foodversyshippersapp.common.Common
 import com.communisolve.foodversyshippersapp.databinding.LayoutShippingOrderBinding
 import com.communisolve.foodversyshippersapp.model.ShipperUserModel
 import com.communisolve.foodversyshippersapp.model.ShippingOrderModel
+import com.communisolve.foodversyshippersapp.ui.ShippingActivity
+import com.google.gson.Gson
+import io.paperdb.Paper
 import java.text.SimpleDateFormat
 
 class MyShippingOrdersAdapter(
@@ -22,7 +26,7 @@ class MyShippingOrdersAdapter(
 
     init {
         simpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
-
+        Paper.init(context)
     }
 
     private lateinit var binding: LayoutShippingOrderBinding
@@ -51,6 +55,14 @@ class MyShippingOrdersAdapter(
 
         if (shippingOrder.isStartTrip){
             binding.btnShipNow.isEnabled = false
+        }
+
+        //Event
+        binding.btnShipNow.setOnClickListener {
+          //Write Data
+            Paper.book().write(Common.SHIPPING_DATA,Gson().toJson(shippingOrderModelList[0]))
+
+            context.startActivity(Intent(context,ShippingActivity::class.java))
         }
 
     }

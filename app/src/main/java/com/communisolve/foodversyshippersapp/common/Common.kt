@@ -44,6 +44,7 @@ object Common {
         return java.lang.StringBuilder("/topics/new_order").toString()
     }
 
+    val SHIPPING_DATA: String?="ShippingData"
     val SHIPPINGORDER_REF: String = "ShippingOrder"
     val NOTI_CONTENT: String? = "content"
     val NOTI_TITLE: String? = "title"
