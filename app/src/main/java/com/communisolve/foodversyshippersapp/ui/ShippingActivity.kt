@@ -55,6 +55,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
+private const val TAG = "ShippingActivity"
 class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
@@ -291,13 +292,17 @@ class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
+                            Log.d(TAG, "drawRoutes: $it")
                         try {
                             val jsonObject = JSONObject(it)
                             val jsonArray = jsonObject.getJSONArray("routes")
                             for (i in 0 until jsonArray.length()) {
                                 val route = jsonArray.getJSONObject(i)
+                               // Toast.makeText(this, "$route", Toast.LENGTH_SHORT).show()
                                 val poly = route.getJSONObject("overview_polyline")
+                              //  Toast.makeText(this, "Poly: $poly", Toast.LENGTH_SHORT).show()
                                 val polyline = poly.getString("points")
+                                //Toast.makeText(this, "Polyline: $polyline", Toast.LENGTH_SHORT).show()
                                 polylineList = Common.decodePoly(polyline)
                             }
 
@@ -311,8 +316,10 @@ class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
 
                             redPolyLines = mMap.addPolyline(polyLineOptions)
 
+
                         } catch (e: Exception) {
                             Log.d("DEBUG", "moveMarkerAnimation: ${e.message}")
+                            Toast.makeText(this, "${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }, {
                         Toast.makeText(this, "${it.message}", Toast.LENGTH_SHORT).show()
@@ -414,8 +421,11 @@ class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
                         val jsonArray = jsonObject.getJSONArray("routes")
                         for (i in 0 until jsonArray.length()) {
                             val route = jsonArray.getJSONObject(i)
+                            Log.d(TAG, "moveMarkerAnimation: $route")
                             val poly = route.getJSONObject("overview_polyline")
+                            Log.d(TAG, "moveMarkerAnimation: $poly")
                             val polyline = poly.getString("points")
+                            Log.d(TAG, "moveMarkerAnimation: $polyline")
                             polylineList = Common.decodePoly(polyline)
                         }
 

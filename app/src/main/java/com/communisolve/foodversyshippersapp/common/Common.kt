@@ -154,6 +154,7 @@ object Common {
             do {
                 b = encoded[index++].toInt() - 63
                 result = result or (b and 0x1f shl shift)
+                shift+=5
             } while (b >= 0x20)
             val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
             lat += dlat
