@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat
 import com.communisolve.foodversyshippersapp.R
 import com.communisolve.foodversyshippersapp.model.ShipperUserModel
 import com.communisolve.foodversyshippersapp.model.TokenModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.database.FirebaseDatabase
 
 object Common {
@@ -44,7 +45,7 @@ object Common {
         return java.lang.StringBuilder("/topics/new_order").toString()
     }
 
-    val SHIPPING_DATA: String?="ShippingData"
+    val SHIPPING_DATA: String? = "ShippingData"
     val SHIPPINGORDER_REF: String = "ShippingOrder"
     val NOTI_CONTENT: String? = "content"
     val NOTI_TITLE: String? = "title"
@@ -124,6 +125,20 @@ object Common {
             -1 -> "Cancelled"
             else -> "Error"
         }
+
+    fun getBearing(begin: LatLng, end: LatLng): Float {
+        val lat = Math.abs(begin.latitude - end.longitude)
+        val lng = Math.abs(begin.longitude - end.longitude)
+        if (begin.latitude < end.latitude && begin.longitude < end.longitude)
+            return Math.toDegrees(Math.atan(lng / lat)).toFloat()
+        else if (begin.latitude >= end.latitude && begin.longitude < end.longitude)
+            return (90-Math.toDegrees(Math.atan(lng/lat))+90).toFloat()
+        else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude)
+            return (Math.toDegrees(Math.atan(lng/lat))+180).toFloat()
+        else if (begin.latitude < end.latitude && begin.longitude >= end.longitude)
+            return (90-Math.toDegrees(Math.atan(lng/lat))+270).toFloat()
+        return -1.0f
+    }
 
     val ORDER_REF: String = "Orders"
 

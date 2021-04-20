@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.text.TextUtils
@@ -14,6 +15,8 @@ import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
 import com.communisolve.foodversyshippersapp.R
 import com.communisolve.foodversyshippersapp.common.Common
+import com.communisolve.foodversyshippersapp.common.LatLngInterpolator
+import com.communisolve.foodversyshippersapp.common.MarkerAnimation
 import com.communisolve.foodversyshippersapp.databinding.ActivityShippingBinding
 import com.communisolve.foodversyshippersapp.model.ShippingOrderModel
 import com.google.android.gms.location.*
@@ -45,6 +48,11 @@ class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
     private var shippingOrderModel: ShippingOrderModel? = null
 
 
+    var isInit = false
+    var previousLocation: Location? = null
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -65,9 +73,12 @@ class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
                         .findFragmentById(R.id.map) as SupportMapFragment
                     mapFragment.getMapAsync(this@ShippingActivity)
 
-                    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this@ShippingActivity)
-                    fusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallback,
-                        Looper.getMainLooper())
+                    fusedLocationProviderClient =
+                        LocationServices.getFusedLocationProviderClient(this@ShippingActivity)
+                    fusedLocationProviderClient.requestLocationUpdates(
+                        locationRequest, locationCallback,
+                        Looper.getMainLooper()
+                    )
                 }
 
                 override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
@@ -156,11 +167,26 @@ class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
                             .position(locationShipper)
                             .title("You")
                     )
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationShipper, 15f))
+
                 } else {
                     shipperMarker!!.position = locationShipper
                 }
 
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationShipper, 15f))
+                if (isInit && previousLocation !=null){
+                    val previousLocationLatlng = LatLng(previousLocation!!.latitude,previousLocation!!.longitude)
+                    MarkerAnimation.animateMarkerToGB(shipperMarker!!,locationShipper,LatLngInterpolator.Spherical())
+                    shipperMarker!!.rotation = Common.getBearing(previousLocationLatlng,locationShipper)
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(locationShipper))
+
+                    previousLocation = locationResult.lastLocation
+                }
+
+                if (!isInit){
+                    isInit = true
+                    previousLocation = locationResult.lastLocation
+                }
+
             }
 
         }
@@ -179,12 +205,16 @@ class ShippingActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.uiSettings.isZoomControlsEnabled = true
         try {
-            val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this,
-            R.raw.uber_light_with_label))
-            if (!success){
+            val success = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    this,
+                    R.raw.uber_light_with_label
+                )
+            )
+            if (!success) {
 
             }
-        }catch (ex:Resources.NotFoundException){
+        } catch (ex: Resources.NotFoundException) {
 
         }
     }
