@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
+import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.communisolve.foodversyshippersapp.common.Common
 import com.communisolve.foodversyshippersapp.databinding.ActivityHomeBinding
 import com.communisolve.foodversyshippersapp.ui.ShippingActivity
+import com.google.firebase.auth.FirebaseAuth
 import io.paperdb.Paper
 
 class HomeActivity : AppCompatActivity() {
@@ -38,11 +40,24 @@ class HomeActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
+                R.id.nav_home, R.id.nav_signOut
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        val headerView = navView.getHeaderView(0)
+        var txt_user = headerView.findViewById<TextView>(R.id.txt_user)
+        txt_user.setText("Welcome, ${Common.currentShipperUser!!.name}")
+
+        navView.menu.findItem(R.id.nav_signOut).setOnMenuItemClickListener {
+            FirebaseAuth.getInstance().signOut()
+            Common.currentShipperUser = null
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return@setOnMenuItemClickListener true
+        }
+
     }
 
     private fun checkStartTrip() {
